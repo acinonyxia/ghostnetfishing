@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mein Profil</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-5">
+    <h2 class="mb-4">Mein Profil</h2>
+
+    <div class="mb-4">
+        <h5>Benutzerdaten</h5>
+        <ul class="list-group">
+            <li class="list-group-item">Vorname: <span th:text="${user.firstname}"></span></li>
+            <li class="list-group-item">Nachname: <span th:text="${user.lastname}"></span></li>
+            <li class="list-group-item">Telefon: <span th:text="${user.phonenumber}"></span></li>
+            <li class="list-group-item">E-Mail: <span th:text="${user.email}"></span></li>
+        </ul>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="mb-4">
+        <h5>Übernommene Geisternetze (Bergung)</h5>
+
+        <ul class="list-group" th:if="${acceptedGhostNets.isEmpty()}">
+            <li class="list-group-item text-muted">Keine Netze zur Bergung übernommen.</li>
+        </ul>
+
+        <ul class="list-group" th:if="${!acceptedGhostNets.isEmpty()}">
+            <li class="list-group-item"
+                th:each="net : ${acceptedGhostNets}">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <!-- Linker Bereich: Koordinaten und Status-Label -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center">
+                        <span class="me-3">
+                            <span class="text-muted">Koordinaten:</span>
+                            <span class="fw-semibold" th:text="${net.latitude + ', ' + net.longitude}"></span>
+                        </span>
+
+                        <span>
+                            <span class="text-muted me-1">Status:</span>
+                            <span th:switch="${net.status.name()}">
+                                <span th:case="'GEMELDET'" class="badge bg-info">Gemeldet</span>
+                                <span th:case="'BERGUNG_BEVORSTEHEND'" class="badge bg-warning text-dark">
+                                    Bergung geplant</span>
+                                <span th:case="'GEBORGEN'" class="badge bg-success">Geborgen</span>
+                                <span th:case="'VERSCHOLLEN'" class="badge bg-danger">Verschollen</span>
+                            </span>
+                        </span>
+                    </div>
+
+                    <!-- Rechter Bereich: Buttons -->
+                    <div th:if="${net.status.name() == 'BERGUNG_BEVORSTEHEND'}" class="mt-2 mt-sm-0 d-flex gap-2">
+                        <!-- Button: Geborgen -->
+                        <button type="button"
+                                class="btn btn-success btn-sm"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target='#recoveredModal__' + ${net.id}">
+                            Erfolgreich geborgen
+                        </button>
+
+                        <!-- Button: Verschollen -->
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target='#lostModal__' + ${net.id}">
+                            Netz verschollen
+                        </button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div th:each="net : ${acceptedGhostNets}">
+
+            <!-- Modal: Bergung bestätigen -->
+            <div th:if="${net.status.name() == 'BERGUNG_BEVORSTEHEND'}"
+                 class="modal fade"
+                 th:id="'recoveredModal__' + ${net.id}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Bergung bestätigen</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Schließen"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Möchtest du das Geisternetz bei
+                                <strong th:text="${net.latitude + ' / ' + net.longitude}">Koordinaten</strong>
+                                wirklich als <strong>geborgen</strong> markieren?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                            <form th:action="@{'/ghostnets/' + ${net.id} + '/mark-recovered'}" method="post"
+                                  class="m-0">
+                                <button type="submit" class="btn btn-success">Ja, geborgen</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: Netz verschollen -->
+            <div th:if="${net.status.name() == 'BERGUNG_BEVORSTEHEND'}"
+                 class="modal fade"
+                 th:id="'lostModal__' + ${net.id}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Verschollen melden</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Schließen"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Möchtest du das Geisternetz bei
+                                <strong th:text="${net.latitude + ' / ' + net.longitude}">Koordinaten</strong>
+                                wirklich als <strong>verschollen</strong> melden?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                            <form th:action="@{'/ghostnets/' + ${net.id} + '/report-lost'}" method="post" class="m-0">
+                                <input type="hidden" name="userId" th:value="${session.user.id}">
+                                <input type="hidden" name="redirectTo" value="/profil">
+                                <button type="submit" class="btn btn-danger">Ja, als verschollen melden</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h5>Gemeldete Geisternetze</h5>
+
+        <ul class="list-group" th:if="${reportedGhostNets.isEmpty()}">
+            <li class="list-group-item text-muted">Keine Netze gemeldet.</li>
+        </ul>
+
+        <ul class="list-group" th:if="${!reportedGhostNets.isEmpty()}">
+            <li class="list-group-item"
+                th:each="net : ${reportedGhostNets}">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <!-- Linker Bereich: Koordinaten und Status-Label -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center">
+                <span class="me-3">
+                    <span class="text-muted">Koordinaten:</span>
+                    <span class="fw-semibold" th:text="${net.latitude + ', ' + net.longitude}"></span>
+                </span>
+
+                        <span>
+                    <span class="text-muted me-1">Status:</span>
+                    <span th:switch="${net.status.name()}">
+                        <span th:case="'GEMELDET'" class="badge bg-info">Gemeldet</span>
+                        <span th:case="'BERGUNG_BEVORSTEHEND'" class="badge bg-warning text-dark">Bergung geplant</span>
+                        <span th:case="'GEBORGEN'" class="badge bg-success">Geborgen</span>
+                        <span th:case="'VERSCHOLLEN'" class="badge bg-danger">Verschollen</span>
+                    </span>
+                </span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="ghostnetNav(currentPath)">
+    <ul class="nav nav-pills mb-4">
+        <li class="nav-item">
+            <a class="nav-link"
+               href="/ghostnets/unassigned"
+               th:classappend="${currentPath == '/ghostnets/unassigned'} ? 'active'">
+                Gemeldete Geisternetze
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               href="/ghostnets/assigned"
+               th:classappend="${currentPath == '/ghostnets/assigned'} ? 'active'">
+                Geisternetze in Bergung
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               href="/ghostnets/map"
+               th:classappend="${currentPath == '/ghostnets/map'} ? 'active'">
+                Kartenansicht
+            </a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
+
+
