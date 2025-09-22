@@ -52,7 +52,7 @@ psql -U <db_user> -d ghostnetdb -f db/seed/ghostnet_dump.sql
 
 3. Konfiguration anpassen
 
-- Datei src/main/resources/application-example.properties kopieren zu application.properties
+- Datei `src/main/resources/application-example.properties` kopieren zu `application.properties`
 - Zugangsdaten für die lokale Datenbank eintragen
 
 3. Build & Run
