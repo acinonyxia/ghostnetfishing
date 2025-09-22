@@ -55,13 +55,13 @@ psql -U <db_user> -d ghostnetdb -f db/seed/ghostnet_dump.sql
 - Datei `src/main/resources/application-example.properties` kopieren zu `application.properties`
 - Zugangsdaten für die lokale Datenbank eintragen
 
-3. Build & Run
+4. Build & Run
 
 ```
 mvn spring-boot:run
 ```
 
-4. Zugriff auf die Anwendung
+5. Zugriff auf die Anwendung
 
 - Browser öffnen: http://localhost:8080
 
